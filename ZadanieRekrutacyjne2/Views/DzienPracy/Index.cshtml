@@ -1,0 +1,49 @@
+﻿@using ZadanieRekrutacyjne2.Models
+@model IEnumerable<DzienPracyModel>
+<div>
+    <h1>
+        Lista Dni Pracy Pracowników
+    </h1>
+    <table class="table table-striped">
+        <thead>
+
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.KodPracownika)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Data)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GodzinaWejscia)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GodzinaWyjscia)
+            </th>
+        </tr>
+        </thead>
+        <tbodu>
+        @foreach (var dzienPracy in Model)
+        {
+            <tr>
+                <th>
+                    @Html.DisplayFor(modelHeader => dzienPracy.KodPracownika)
+                </th>
+                <th>
+                        @{
+                            var date = dzienPracy.Data.ToShortDateString();
+                        }
+                        @Html.DisplayFor(m => date)
+                </th>
+                <th>
+                    @Html.DisplayFor(modelHeader => dzienPracy.GodzinaWejscia)
+                </th>
+                <th>
+                    @Html.DisplayFor(modelHeader => dzienPracy.GodzinaWyjscia)
+                </th>
+            </tr>
+        }
+        </tbodu>
+        
+    </table>
+</div>
