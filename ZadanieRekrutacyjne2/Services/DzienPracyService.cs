@@ -45,107 +45,91 @@ namespace ZadanieRekrutacyjne2.Services
         private List<DzienPracyModel> Konwersja(List<String[]> lista)
         {
             List<DzienPracyModel> rezult = new List<DzienPracyModel>();
-            foreach (String[] p in lista)
+            foreach (String[] line in lista)
             {
-                if(p.Length == 5)
+                if(line.Length == 5)
                 {
-                    //sprrawdzanie poprawności wpisu
-                    if ((p[0] != "") && (p[1] != "") && (p[2] != "") && (p[3] != "") && (p[4] != ""))
+                    //sprawdzanie poprawności wpisu
+                    if ((line[0] != "") && (line[1] != "") && (line[2] != "") && (line[3] != "") && (line[4] != ""))
                     {
-                        var a = p[0];
-                        var b = DateTime.Parse(p[1]);
-                        var c = TimeSpan.Parse(p[2]);
-                        var d = TimeSpan.Parse(p[3]);
-                        var e = p[4];
-                        rezult.Add(new DzienPracyModel(a, b, c, d));
+                        rezult = DodajWpis(rezult, line[0], DateTime.Parse(line[1]), TimeSpan.Parse(line[2]), TimeSpan.Parse(line[3]), line[4]);
                     }
                 }
-                if (p.Length == 4)
+                if (line.Length == 4)
                 {
-                    //sprrawdzanie poprawności wpisu
-                    if ((p[0]!="") && (p[1] != "") && (p[2] != "") && (p[3] != ""))
+                    //sprawdzanie poprawności wpisu
+                    if ((line[0] != "") && (line[1] != "") && (line[2] != "") && (line[3] != ""))
                     {
-                        var a = p[0];
-                        var b = DateTime.Parse(p[1]);
-                        var c = TimeSpan.Parse(p[2]);
-                        var d = p[3];
-                        //dla pierwszego wpisu do listy
-                        if (rezult.Count == 0)
-                        {
-                            //dla danych wejściowych
-                            if (d == "WE")
-                            {
-                                //dodaj nowy wpis
-                                rezult.Add(new DzienPracyModel(a, b, c, null));
-                            }
-                            //dla danych wyjściowych
-                            if (d == "WY")
-                            {
-                                //dodaj nowy wpis
-                                rezult.Add(new DzienPracyModel(a, b, null, c));
-                            }
-                        }
-                        else
-                        for(int i = rezult.Count-1; i >= 0; i--)
-                        {
-                            var dzienPracy = rezult[i];
-                            //dla danych wejściowych
-                            if (d == "WE")
-                            {
-                                //czy wpis istnieje
-                                if ((dzienPracy.KodPracownika == a) && (dzienPracy.Data == b))
-                                {
-                                    //dodaj nowy wpis
-                                    rezult.Add(new DzienPracyModel(a, b, c, null));
-                                    break;
-                                }
-                                else
-                                {
-                                    //dodaj nowy wpis
-                                    rezult.Add(new DzienPracyModel(a, b, c, null));
-                                    break;
-                                }
-                            }
-                            //dla danych wyjściowych
-                            if (d == "WY")
-                            {
-                                //czy wpis istnieje
-                                if ((dzienPracy.KodPracownika == a) && (dzienPracy.Data == b))
-                                {
-                                    //analisa wpisów niepełnych
-                                    if (dzienPracy.GodzinaWyjscia == null)
-                                    {
-                                        dzienPracy.GodzinaWyjscia = c;
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    //czy poprzedni dzień ma miepełny wpis wyjściowy
-                                    if ((dzienPracy.KodPracownika == a) && (dzienPracy.Data.AddDays(1) == b))
-                                    {
-                                        if(dzienPracy.GodzinaWyjscia == null)
-                                        {
-                                            //kończenie nocnej zmiany
-                                            dzienPracy.GodzinaWyjscia = c;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            //czy wpis istnieje
-                            if ((dzienPracy.KodPracownika == a) && (dzienPracy.Data == b))
-                            {
-                                //analisa wpisów niepełnych
-                                if((dzienPracy.GodzinaWejscia == null)||(dzienPracy.GodzinaWyjscia == null))
-                                {
-
-                                }
-                            }
-                        }
+                        rezult = DodajWpis(rezult, line[0], DateTime.Parse(line[1]), TimeSpan.Parse(line[2]), line[3]);
                     }
                 }
             }
+            return rezult;
+        }
+        //analiza lini pliku CSV z jednym wpisem czasu pracy
+        private List<DzienPracyModel> DodajWpis(List<DzienPracyModel>  rezult, string idPracownika, DateTime data, TimeSpan godzinaWejscia, TimeSpan godzinaWyjscia, string czasPracy)
+        {
+            rezult.Add(new DzienPracyModel(idPracownika, data, godzinaWejscia, godzinaWyjscia));
+            return rezult;
+        }
+        //analiza lini pliku CSV z dwoma wpisami czasu pracy
+        private List<DzienPracyModel> DodajWpis(List<DzienPracyModel> rezult, string idPracownika, DateTime data, TimeSpan godzina, string status)
+        {
+            //dla pierwszego wpisu do listy
+            if (rezult.Count == 0)
+            {
+                //dla danych wejściowych
+                if (status == "WE")
+                {
+                    //dodaj nowy wpis
+                    rezult.Add(new DzienPracyModel(idPracownika, data, godzina, null));
+                }
+                //dla danych wyjściowych
+                if (status == "WY")
+                {
+                    //dodaj nowy wpis
+                    rezult.Add(new DzienPracyModel(idPracownika, data, null, godzina));
+                }
+            }
+            else
+                for (int i = rezult.Count - 1; i >= 0; i--)
+                {
+                    var dzienPracy = rezult[i];
+                    //dla danych wejściowych
+                    if (status == "WE")
+                    {
+                        //dodaj nowy wpis
+                        rezult.Add(new DzienPracyModel(idPracownika, data, godzina, null));
+                        break;
+                    }
+                    //dla danych wyjściowych
+                    if (status == "WY")
+                    {
+                        //czy wpis istnieje
+                        if ((dzienPracy.KodPracownika == idPracownika) && (dzienPracy.Data == data))
+                        {
+                            //analisa wpisów niepełnych
+                            if (dzienPracy.GodzinaWyjscia == null)
+                            {
+                                dzienPracy.GodzinaWyjscia = godzina;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            //czy poprzedni dzień ma miepełny wpis wyjściowy
+                            if ((dzienPracy.KodPracownika == idPracownika) && (dzienPracy.Data.AddDays(1) == data))
+                            {
+                                if (dzienPracy.GodzinaWyjscia == null)
+                                {
+                                    //kończenie nocnej zmiany
+                                    dzienPracy.GodzinaWyjscia = godzina;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             return rezult;
         }
     }
